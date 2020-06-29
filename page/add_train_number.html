@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车票管理系统</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+
+<body>
+<div class="outerStyle">
+    <!--引入公共头部内容头部开始-->
+    <div class="header"></div>
+    <!--引入公共头部内容头部结束-->
+
+    <!--内容区开始-->
+    <div class="outerContentStyle">
+        <div class="formStyle">
+            <form id="addTrainFrom" action="#" method="post">
+                <div class="addKeyStyle">列车类型：</div>
+                <div class="addKeyStyle">
+                    <select name="trainType" id="" style="width: 180px; height: 22px">
+                        <option value="T">T（特快）</option>
+                        <option value="K">K（快速）</option>
+                        <option value="G">G（高铁）</option>
+                        <option value="D">D（动车）</option>
+                        <option value="L">L（临时）</option>
+                    </select>
+                </div>
+                <br>
+                <br>
+                <div class="addKeyStyle">列车班次号：</div>
+                <div class="addKeyStyle"><input type="text" name="trainMark" id="trainMark" style="width: 180px"></div>
+                <br>
+                <br>
+                <div class="addKeyStyle">发车时间：</div>
+                <div class="addKeyStyle"><input type="datetime-local" name="departureTime" id="departureTime"
+                                                style="width: 180px"></div>
+                <br>
+                <br>
+                <div class="addKeyStyle">起始站：</div>
+                <div class="addKeyStyle"><input type="text" name="originStation" id="originStation"
+                                                style="width: 180px"></div>
+                <br>
+                <br>
+                <div class="addKeyStyle">终点站：</div>
+                <div class="addKeyStyle"><input type="text" name="destination" id="destination" style="width: 180px">
+                </div>
+                <br>
+                <br>
+                <div class="addKeyStyle">行车时间：</div>
+                <div class="addKeyStyle"><input type="text" name="travelTime" id="travelTime" style="width: 180px">
+                </div>
+                <br>
+                <br>
+                <div class="addKeyStyle">载客量：</div>
+                <div class="addKeyStyle"><input type="text" name="busload" id="busload" style="width: 180px"></div>
+                <br>
+                <br>
+                <div class="addKeyStyle"><input type="button" onclick="tishi()" value="录入"></div>
+                <div class="addKeyStyle"><input type="reset" value="清空"></div>
+            </form>
+        </div>
+    </div>
+    <!--内容区结束-->
+
+</div>
+</body>
+
+<!--引入资源文件-->
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    /*加载公共代码部分*/
+    $(".header").load("head_template.html");
+
+    /*添加列车*/
+    function tishi() {
+        /*判断是否为空*/
+        var trainMark = $("#trainMark").val();
+        var departureTime = $("#departureTime").val();
+        var originStation = $("#originStation").val();
+        var destination = $("#destination").val();
+        var travelTime = $("#travelTime").val();
+        var busload = $("#busload").val();
+        if (trainMark != "" && departureTime != "" &&
+            originStation != "" && destination != "" &&
+            travelTime != "" && busload != "") {
+            /*异步添加请求后端列车*/
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "http://localhost:8080/train/",
+                data: $("#addTrainFrom").serialize(),
+                success: function (data) {
+                    if (data.flag) {
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                    alert("服务器异常！");
+                }
+            });
+
+        } else {
+            alert("请输入完整信息！")
+        }
+    }
+
+</script>
+
+
+</html>

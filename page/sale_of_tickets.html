@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车票管理系统</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+
+<body>
+<div class="outerStyle">
+    <!--引入公共头部内容头部开始-->
+    <div class="header"></div>
+    <!--引入公共头部内容头部结束-->
+
+    <!--内容区开始-->
+    <div class="outerContentStyle">
+        <div class="allTrainStyle">
+            <div class="queryListStyle">
+                <form id="queryBuyTicketFrom" action="" method="post">
+                    <input type="hidden" name="pageNumber" id="pageNumber">
+                    <input type="hidden" name="per" id="per">
+                    时间：<input type="date" name="departureTime" id="departureTime">
+                    起始站：<input type="text" name="originStation" id="originStation">
+                    终点站：<input type="text" name="destination" id="destination">
+                    <input type="button" onclick="queryBuyTicket()" value="查询">
+                </form>
+            </div>
+            <table class="tableListStyle" border="1">
+                <tr>
+                    <th>班次</th>
+                    <th>发车时间</th>
+                    <th>起始站</th>
+                    <th>终点站</th>
+                    <th>余票</th>
+                    <th>操作</th>
+                </tr>
+                <tr>
+                    <td>T001</td>
+                    <td>2020/6/27 09:23</td>
+                    <td>九江</td>
+                    <td>南昌</td>
+                    <td>9</td>
+                    <td><a href="buy_tickets.html">购票</a></td>
+                </tr>
+                <tr>
+                    <td>T001</td>
+                    <td>2020/6/27 09:23</td>
+                    <td>九江</td>
+                    <td>南昌</td>
+                    <td>9</td>
+                    <td><a href="buy_tickets.html">购票</a></td>
+                </tr>
+            </table>
+        </div>
+        <div class="pagination">
+            共有数据 <span id="total"></span> 条
+            <a href="####" class="removeUnderline" onclick="pagination(1)">上一页</a>
+            <a href="####" class="removeUnderline" onclick="pagination(2)">下一页</a>
+            共
+            <sapn id="pages"></sapn>
+            页
+            当前是第
+            <sapn id="pageNumberSpan"></sapn>
+            页
+        </div>
+    </div>
+    <!--内容区结束-->
+</div>
+</body>
+
+<!--引入资源文件-->
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    /*加载公共代码部分*/
+    $(".header").load("head_template.html");
+
+    $(function () {
+        $(".tableListStyle").empty();
+    })
+
+    function queryBuyTicket() {
+        var departureTime = $("#departureTime").val();
+        var originStation = $("#originStation").val();
+        var destination = $("#destination").val();
+        if (departureTime != null && departureTime !== "" &&
+            originStation != null && originStation !== "" &&
+            destination != null && destination !== ""
+        ) {
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/ticketing/",
+                dataType: "json",
+                data: $("#queryBuyTicketFrom").serialize(),
+                success: function (data) {
+                    if (data.flag) {
+                        /*成功，获取数据*/
+                        var html = packageHtml2(data);
+                        $(".tableListStyle").empty();
+                        $(".tableListStyle").append(html);
+                        $("#total").text(data.object.total);
+                        $("#pages").text(data.object.pages);
+                        $("#pageNumberSpan").text(data.object.pageNum);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function () {
+                    alert("页面数据加载错误！");
+                }
+            });
+
+        } else {
+            alert("请输入完整信息！");
+        }
+
+    }
+
+    /*上一页下一页操作，per：1上一页，per：2下一页*/
+    function pagination(per) {
+        var departureTime = $("#departureTime").val();
+        var originStation = $("#originStation").val();
+        var destination = $("#destination").val();
+        if (departureTime != null && departureTime !== "" &&
+            originStation != null && originStation !== "" &&
+            destination != null && destination !== ""
+        ) {
+            $("#per").val(per);
+            $("#pageNumber").val($("#pageNumberSpan").html());
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/ticketing/",
+                dataType: "json",
+                data: $("#queryBuyTicketFrom").serialize(),
+                success: function (data) {
+                    if (data.flag) {
+                        /*成功，获取数据*/
+                        var html = packageHtml2(data);
+                        $(".tableListStyle").empty();
+                        $(".tableListStyle").append(html);
+                        $("#total").text(data.object.total);
+                        $("#pages").text(data.object.pages);
+                        $("#pageNumberSpan").text(data.object.pageNum);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function () {
+                    alert("页面数据加载错误！");
+                }
+            });
+        } else {
+            alert("请输入完整信息！");
+        }
+    }
+
+    /*根据列车id进行购票*/
+    function buyTicket(trainId) {
+        window.location="buy_tickets.html?trainId="+trainId;
+    }
+
+</script>
+
+
+</html>

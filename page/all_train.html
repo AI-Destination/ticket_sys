@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车票管理系统</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+
+<body>
+<div class="outerStyle">
+    <!--引入公共头部内容头部开始-->
+    <div class="header"></div>
+    <!--引入公共头部内容头部结束-->
+
+    <!--内容区开始-->
+    <div class="outerContentStyle">
+        <div class="allTrainStyle">
+            <table class="tableListStyle" border="1">
+                <tr>
+                    <th>班次</th>
+                    <th>发车时间</th>
+                    <th>起点站</th>
+                    <th>终点站</th>
+                    <th>行车时间(小时)</th>
+                    <th>额定载客量</th>
+                    <th>已订票人数</th>
+                </tr>
+                <div id="trainData"></div>
+                <tr>
+                    <td>T001</td>
+                    <td>2020/6/27 09:23</td>
+                    <td>九江</td>
+                    <td>南昌</td>
+                    <td>1.0</td>
+                    <td>375</td>
+                    <td>300</td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="pagination">
+            共有数据 <span id="total"></span> 条
+            <a href="####" class="removeUnderline" onclick="pagination(1)">上一页</a>
+            <a href="####" class="removeUnderline" onclick="pagination(2)">下一页</a>
+            共
+            <sapn id="pages"></sapn>
+            页
+            当前是第
+            <sapn id="pageNumber"></sapn>
+            页
+        </div>
+    </div>
+    <!--内容区结束-->
+</div>
+</body>
+
+<!--引入资源文件-->
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    /*加载公共代码部分*/
+    $(".header").load("head_template.html");
+
+    /*页面加载完成请求后端获取所有列车*/
+    $(function () {
+        $(".tableListStyle").empty();
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/train/",
+            dataType: "json",
+            success: function (data) {
+                if (data.flag) {
+                    /*成功，获取数据*/
+                    var html = packageHtml(data);
+                    $(".tableListStyle").append(html);
+                    $("#total").text(data.object.total);
+                    $("#pages").text(data.object.pages);
+                    $("#pageNumber").text(data.object.pageNum);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    });
+
+    /*上一页下一页操作，per：1上一页，per：2下一页*/
+    function pagination(per) {
+        var pageNumber = $("#pageNumber").html();
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/train/",
+            dataType: "json",
+            data: {"per": per, "pageNumber": pageNumber},
+            success: function (data) {
+                if (data.flag) {
+                    /*成功，获取数据*/
+                    var html = packageHtml(data);
+                    $(".tableListStyle").empty();
+                    $(".tableListStyle").append(html);
+                    $("#total").text(data.object.total);
+                    $("#pages").text(data.object.pages);
+                    $("#pageNumber").text(data.object.pageNum);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    }
+
+</script>
+
+
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车票管理系统</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+
+<body>
+<div class="outerStyle">
+    <!--引入公共头部内容头部开始-->
+    <div class="header"></div>
+    <!--引入公共头部内容头部结束-->
+
+    <!--内容区开始-->
+    <div class="outerContentStyle">
+        <div class="allTrainStyle">
+            <div class="queryListStyle">
+                <form id="queryFrom" action="" method="post">
+                    <input type="hidden" name="pageNumber" id="pageNumber">
+                    <input type="hidden" name="per" id="per">
+                    班次：<input type="text" name="trainNumber">
+                    起始站：<input type="text" name="originStation">
+                    终点站：<input type="text" name="destination">
+                    <input type="button" onclick="convert()" value="查询">
+                </form>
+            </div>
+            <table class="tableListStyle" border="1">
+                <tr>
+                    <th>班次</th>
+                    <th>发车时间</th>
+                    <th>起始站</th>
+                    <th>终点站</th>
+                    <th>余票</th>
+                    <th>已售票</th>
+                </tr>
+                <tr>
+                    <td>T001</td>
+                    <td>2020/6/27 09:23</td>
+                    <td>九江</td>
+                    <td>南昌</td>
+                    <td>9</td>
+                    <td>90</td>
+                </tr>
+            </table>
+        </div>
+        <div class="pagination">
+            共有数据 <span id="total"></span> 条
+            <a href="####" class="removeUnderline" onclick="pagination(1)">上一页</a>
+            <a href="####" class="removeUnderline" onclick="pagination(2)">下一页</a>
+            共
+            <sapn id="pages"></sapn>
+            页
+            当前是第
+            <sapn id="pageNumberSpan"></sapn>
+            页
+        </div>
+    </div>
+    <!--内容区结束-->
+</div>
+</body>
+
+<!--引入资源文件-->
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    /*加载公共代码部分*/
+    $(".header").load("head_template.html");
+
+    /*页面加载完成初始化表格*/
+    $(function () {
+        $(".tableListStyle").empty();
+    });
+
+    /*查询*/
+    function convert() {
+        $("#pageNumber").val("1");
+        $("#per").val("3");
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/query/",
+            dataType: "json",
+            data: $("#queryFrom").serialize(),
+            sync:false,
+            success: function (data) {
+                if (data.flag) {
+                    var html = packageHtml(data);
+                    $(".tableListStyle").empty();
+                    $(".tableListStyle").append(html);
+                    $("#total").text(data.object.total);
+                    $("#pages").text(data.object.pages);
+                    $("#pageNumberSpan").text(data.object.pageNum);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function () {
+                alert("服务器异常！");
+            }
+        });
+    }
+
+    /*上一页下一页操作，per：1上一页，per：2下一页*/
+    function pagination(per) {
+        $("#per").val(per);
+        $("#pageNumber").val($("#pageNumberSpan").html());
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/query/",
+            dataType: "json",
+            data: $("#queryFrom").serialize(),
+            success: function (data) {
+                if (data.flag) {
+                    /*成功，获取数据*/
+                    var html = packageHtml(data);
+                    $(".tableListStyle").empty();
+                    $(".tableListStyle").append(html);
+                    $("#total").text(data.object.total);
+                    $("#pages").text(data.object.pages);
+                    $("#pageNumberSpan").text(data.object.pageNum);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    }
+
+</script>
+
+
+</html>

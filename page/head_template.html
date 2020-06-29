@@ -1,0 +1,232 @@
+<!--系统标题-->
+<div class="systemHeaderStyle">欢迎进入车票管理系统</div>
+
+<!--注销那边的元素开始-->
+<br>
+<div class="loginOutStyle"><a href="####" class="removeUnderline" onclick="loginOut()">注销</a></div>
+<div class="loginOutStyle">管理员：<span id="userName">刘亮</span></div>
+<br>
+<br>
+<!--注销那边的元素结束-->
+
+<!--导航栏开始-->
+<div class="navigationBarStyle">
+    <div class="navigationBarItemStyle ">
+        <a href="index.html" class="removeUnderline">首页</a>
+    </div>
+    <div class="navigationBarItemStyle menuitem">
+        <div><a href="####" class="removeUnderline">车次管理</a></div>
+        <div class="submenu">
+            <div class="itemAStyle"><a href="add_train_number.html" class="removeUnderline">车次录入</a></div>
+            <div class="itemAStyle"><a href="all_train.html" class="removeUnderline">车次浏览</a></div>
+        </div>
+    </div>
+    <div class="navigationBarItemStyle menuitem">
+        <div><a href="####" class="removeUnderline">查询管理</a></div>
+        <div class="submenu">
+            <div class="itemAStyle"><a href="query.html" class="removeUnderline">综合查询</a></div>
+        </div>
+    </div>
+    <div class="navigationBarItemStyle menuitem">
+        <div><a href="####" class="removeUnderline">车票管理</a></div>
+        <div class="submenu">
+            <div class="itemAStyle"><a href="sale_of_tickets.html" class="removeUnderline">售票</a></div>
+            <div class="itemAStyle"><a href="get_a_refund_for_a_ticket.html" class="removeUnderline">退票</a></div>
+        </div>
+    </div>
+</div>
+<!--导航栏结束-->
+
+
+<!--引入资源文件-->
+<script type="text/javascript">
+
+
+    //鼠标进入导航栏显示下拉框
+    $(function () {
+        var oldColor = "";
+        /*鼠标移入事件 #cc0000 #d9e8fb*/
+        $(".navigationBarItemStyle").mouseover(function () {
+            oldColor = $(this).css("background-color");
+            $(this).css("background-color", "#cc0000");
+
+            /*鼠标移出事件*/
+        }).mouseout(function () {
+            $(this).css("background-color", oldColor);
+        });
+    });
+
+    /*注销请求*/
+    function loginOut() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/sys/loginOut",
+            dataType: "json",
+            success: function (data) {
+                if (data.flag) {
+                    alert(data.message);
+                    window.location = "sys_login.html";
+                } else {
+
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    }
+
+    /*页面加载完成请求后端获取用户信息*/
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/sys/getUserName",
+            dataType: "json",
+            success: function (data) {
+                if (data.flag) {
+                    $("#userName").text(data.object.name);
+                } else {
+                    alert(data.message);
+                    window.location = "sys_login.html";
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    });
+
+    /*对表格数据进行拼接*/
+    function packageHtml(data) {
+        var html = "";
+        html += '<tr>';
+        html += '<th>班次</th>';
+        html += '<th>发车时间</th>';
+        html += '<th>起点站</th>';
+        html += '<th>终点站</th>';
+        html += '<th>行车时间(小时)</th>';
+        html += '<th>额定载客量</th>';
+        html += '<th>已订票人数</th>';
+        html += '</tr>';
+        var trainList = data.object.objectList;
+        $.each(trainList, function (key, value) {
+                /*计算余票*/
+                var remainingVotes = parseInt(trainList[key].busload) - parseInt(trainList[key].ticketsLeft);
+                html += '<tr>';
+                html += '<td>' + trainList[key].trainNumber + '</td>';
+                if (trainList[key].departureTimeString === '已发出') {
+                    html += '<td style="color: red">' + trainList[key].departureTimeString + '</td>';
+                } else {
+                    html += '<td>' + trainList[key].departureTimeString + '</td>';
+                }
+                html += '<td>' + trainList[key].originStation + '</td>';
+                html += '<td>' + trainList[key].destination + '</td>';
+                html += '<td>' + trainList[key].travelTime + '</td>';
+                html += '<td>' + trainList[key].busload + '</td>';
+                html += '<td>' + remainingVotes + '</td>';
+                html += '</tr>';
+            }
+        );
+        return html;
+    }
+
+    /*对表格数据进行拼接*/
+    function packageHtml2(data) {
+        var html = "";
+        html += '<tr>';
+        html += '<th>班次</th>';
+        html += '<th>发车时间</th>';
+        html += '<th>起点站</th>';
+        html += '<th>终点站</th>';
+        html += '<th>行车时间(小时)</th>';
+        html += '<th>余票</th>';
+        html += '<th>操作</th>';
+        html += '</tr>';
+        var trainList = data.object.objectList;
+        $.each(trainList, function (key, value) {
+                html += '<tr>';
+                html += '<td>' + trainList[key].trainNumber + '</td>';
+                if (trainList[key].departureTimeString === '已发出') {
+                    html += '<td style="color: red">' + trainList[key].departureTimeString + '</td>';
+                } else {
+                    html += '<td>' + trainList[key].departureTimeString + '</td>';
+                }
+                html += '<td>' + trainList[key].originStation + '</td>';
+                html += '<td>' + trainList[key].destination + '</td>';
+                html += '<td>' + trainList[key].travelTime + '</td>';
+                html += '<td>' + parseInt(trainList[key].ticketsLeft) + '</td>';
+                if (parseInt(trainList[key].ticketsLeft) <= 0) {
+                    html += '<td> <a href="####" style="color: red">无票</a> </td>';
+                } else {
+                    var trainId = trainList[key].trainId;
+                    html += '<td> <a href="####" onclick="buyTicket(\'' + trainId + '\')">购票</a> </td>';
+                }
+                html += '</tr>';
+            }
+        );
+        return html;
+    }
+
+    function packageHtml3(data) {
+        var html = "";
+        html += '<tr>';
+        html += '<th>班次</th>';
+        html += '<th>发车时间</th>';
+        html += '<th>起点站</th>';
+        html += '<th>终点站</th>';
+        html += '</tr>';
+        var train = data.object;
+        if (train != null) {
+            html += '<tr>';
+            html += '<td>' + train.trainNumber + '</td>';
+            if (train.departureTimeString === '已发出') {
+                html += '<td style="color: red">' + train.departureTimeString + '</td>';
+            } else {
+                html += '<td>' + train.departureTimeString + '</td>';
+            }
+            html += '<td>' + train.originStation + '</td>';
+            html += '<td>' + train.destination + '</td>';
+            html += '</tr>';
+        }
+        return html;
+    }
+
+    function packageHtml4(data) {
+        var html = "";
+        html += '<tr>';
+        html += '<th>姓名</th>';
+        html += '<th>身份证号</th>';
+        html += '<th>班次</th>';
+        html += '<th>发车时间</th>';
+        html += '<th>起点站</th>';
+        html += '<th>终点站</th>';
+        html += '<th>座位类型</th>';
+        html += '<th>操作</th>';
+        html += '</tr>';
+        var trainList = data.object.objectList;
+        $.each(trainList, function (key, value) {
+                html += '<tr>';
+                html += '<td>' + trainList[key].name + '</td>';
+                html += '<td>' + trainList[key].idCard + '</td>';
+                html += '<td>' + trainList[key].trainNumber + '</td>';
+                if (trainList[key].departureTimeString === '已发出') {
+                    html += '<td style="color: red">' + trainList[key].departureTimeString + '</td>';
+                } else {
+                    html += '<td>' + trainList[key].departureTimeString + '</td>';
+                }
+                html += '<td>' + trainList[key].originStation + '</td>';
+                html += '<td>' + trainList[key].destination + '</td>';
+                html += '<td>' + trainList[key].seatType + '</td>';
+                if (trainList[key].departureTimeString === '已发出') {
+                    html += '<td> <a href="####" style="color: red">已过期</a> </td>';
+                } else {
+                    var trainId = trainList[key].trainId;
+                    var customerId = trainList[key].customerId;
+                    html += '<td> <a href="####" onclick="returnATicket(\'' + trainId + '\',\'' + customerId + '\')">退票</a> </td>';
+                }
+                html += '</tr>';
+            }
+        );
+        return html;
+    }
+</script>

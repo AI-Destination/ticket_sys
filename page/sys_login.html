@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>后台登入页面</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+<body>
+<div class="sysLoginStyle">
+    <h2 class="sys_title">车票管理系统</h2>
+    <form id="loginFrom" action="" method="post">
+        <div class="addKeyStyle">账号：</div>
+        <div class="addKeyStyle"><input type="text" name="userName" style="width: 180px"></div>
+        <br>
+        <br>
+        <div class="addKeyStyle">密码：</div>
+        <div class="addKeyStyle"><input type="password" name="passWord" style="width: 180px"></div>
+        <br>
+        <br>
+        <div class="addKeyStyle"><input type="button" onclick="login()" value="登入"></div>
+        <div class="addKeyStyle"><input type="reset" value="置空"></div>
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="application/javascript">
+
+    /*登入*/
+    function login() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            sync:false,
+            url: "http://localhost:8080/sys/login",
+            data: $("#loginFrom").serialize(),
+            success: function (data) {
+                if (data.flag) {
+                    alert(data.message);
+                    window.location="index.html";
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function (data) {
+                alert("服务器异常！");
+            }
+        });
+    }
+
+
+</script>
+
+</html>

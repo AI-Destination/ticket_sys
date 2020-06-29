@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车票管理系统</title>
+    <!--自定义样式-->
+    <link type="text/css" rel="styleSheet" href="../static/me.css"/>
+</head>
+
+<body>
+<div class="outerStyle">
+    <!--引入公共头部内容头部开始-->
+    <div class="header"></div>
+    <!--引入公共头部内容头部结束-->
+
+    <!--内容区开始-->
+    <div class="outerContentStyle">
+        <div class="allTrainStyle">
+            <table class="tableListStyle" border="1">
+                <tr>
+                    <th>班次</th>
+                    <th>发车时间</th>
+                    <th>起始站</th>
+                    <th>终点站</th>
+                </tr>
+                <tr>
+                    <td>T001</td>
+                    <td>2020/6/27 09:23</td>
+                    <td>九江</td>
+                    <td>南昌</td>
+                </tr>
+            </table>
+            <div class="CustomerInfoStyle">
+                <form id="buy" action="" method="post">
+                    <input type="hidden" name="trainId" id="trainId">
+                    <div class="addKeyStyle">姓名：</div>
+                    <div class="addKeyStyle"><input type="text" id="name" name="name" style="width: 180px"></div>
+                    <br>
+                    <br>
+                    <div class="addKeyStyle">身份证号：</div>
+                    <div class="addKeyStyle"><input type="text" id="idCard" name="idCard" style="width: 180px"></div>
+                    <br>
+                    <br>
+                    <div class="addKeyStyle">座位类型：</div>
+                    <div class="addKeyStyle">
+                        <select name="seatType" id="" style="width: 180px; height: 22px">
+                            <option value="硬座">硬座</option>
+                            <option value="卧铺">卧铺</option>
+                        </select>
+                    </div>
+                    <br>
+                    <br>
+                    <div class="addKeyStyle"><input type="button" onclick="buy()" value="订购"></div>
+                    <div class="addKeyStyle"><input type="reset" value="清空"></div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    <!--内容区结束-->
+</div>
+</body>
+
+<!--引入资源文件-->
+<script type="text/javascript" src="../static/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    /*加载公共代码部分*/
+    $(".header").load("head_template.html");
+
+    $(function () {
+        var trainId = getUrlParam("trainId");
+        /*加载购票信息*/
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/ticketing/",
+            dataType: "json",
+            data: {"trainId": trainId},
+            success: function (data) {
+                if (data.flag) {
+                    /*成功，获取数据*/
+                    var html = packageHtml3(data);
+                    $(".tableListStyle").empty();
+                    $(".tableListStyle").append(html);
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+    })
+
+    /*获取url上的参数*/
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+        if (r != null) return unescape(r[2]);
+        return null; //返回参数值
+    }
+
+    /*买票*/
+    function buy() {
+        /*设置隐含域属性值*/
+        $("#trainId").val(getUrlParam("trainId"));
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/ticketing/buy",
+            dataType: "json",
+            data: $("#buy").serialize(),
+            success: function (data) {
+                if (data.flag) {
+                    /*成功，获取数据*/
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+                window.location="sale_of_tickets.html";
+            },
+            error: function () {
+                alert("页面数据加载错误！");
+            }
+        });
+
+    }
+
+</script>
+
+
+</html>
